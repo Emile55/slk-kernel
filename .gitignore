@@ -1,0 +1,12 @@
+# Binaires compilés
+*.exe
+*.o
+*.out
+test_kernel
+bench
+bench_final
+kernel_arm.o
+
+# Fichiers temporaires
+*.tmp
+*.log
