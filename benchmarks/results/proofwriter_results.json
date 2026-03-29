@@ -1,0 +1,74 @@
+[
+  {
+    "label": "maxD=0",
+    "instances": 200,
+    "skipped": 0,
+    "total_validations": 1970,
+    "correct_accepts": 624,
+    "correct_rejects": 1346,
+    "false_positives": 0,
+    "theorem1_holds": true,
+    "avg_latency_us": 1.8173,
+    "throughput_M_per_s": 0.55
+  },
+  {
+    "label": "maxD=1",
+    "instances": 200,
+    "skipped": 0,
+    "total_validations": 2572,
+    "correct_accepts": 784,
+    "correct_rejects": 1788,
+    "false_positives": 0,
+    "theorem1_holds": true,
+    "avg_latency_us": 1.847,
+    "throughput_M_per_s": 0.54
+  },
+  {
+    "label": "maxD=2",
+    "instances": 40,
+    "skipped": 0,
+    "total_validations": 504,
+    "correct_accepts": 180,
+    "correct_rejects": 324,
+    "false_positives": 0,
+    "theorem1_holds": true,
+    "avg_latency_us": 2.7817,
+    "throughput_M_per_s": 0.36
+  },
+  {
+    "label": "maxD=3",
+    "instances": 16,
+    "skipped": 0,
+    "total_validations": 220,
+    "correct_accepts": 92,
+    "correct_rejects": 128,
+    "false_positives": 0,
+    "theorem1_holds": true,
+    "avg_latency_us": 5.3,
+    "throughput_M_per_s": 0.19
+  },
+  {
+    "label": "maxD=4",
+    "instances": 8,
+    "skipped": 0,
+    "total_validations": 112,
+    "correct_accepts": 48,
+    "correct_rejects": 64,
+    "false_positives": 0,
+    "theorem1_holds": true,
+    "avg_latency_us": 3.7732,
+    "throughput_M_per_s": 0.27
+  },
+  {
+    "label": "ProofWriter-all-1000",
+    "instances": 1000,
+    "skipped": 0,
+    "total_validations": 10914,
+    "correct_accepts": 3410,
+    "correct_rejects": 7504,
+    "false_positives": 0,
+    "theorem1_holds": true,
+    "avg_latency_us": 2.0493,
+    "throughput_M_per_s": 0.49
+  }
+]
