@@ -36,7 +36,7 @@ PROOFWRITER_RELATIONS = [
 
 # ─── Loader ───────────────────────────────────────────────────────────────────
 
-def load_proofwriter(max_instances=1000):
+def load_proofwriter(max_instances=85468):
     from datasets import load_dataset
     print("Loading ProofWriter (default config, validation split)...")
     try:
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     print("Depth field: maxD (0=trivial, 5=deep reasoning)")
     print()
 
-    all_instances = load_proofwriter(max_instances=1000)
+    all_instances = load_proofwriter(max_instances=85468)
     if not all_instances:
         print("ERROR: No instances loaded.")
         sys.exit(1)
