@@ -1,99 +1,123 @@
 # SLK — Simplex Logical Kernel
 
-Formally verified logical inference engine.  
-16 universal axioms in C99. Zero malloc. Zero dependencies.
+**A Proven-Sound Axiomatic Constraint Validator for Autonomous Agents on Constrained Hardware**
 
-## Quick start (Linux / macOS)
+[![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
+[![HAL](https://img.shields.io/badge/HAL-hal--05573274-green.svg)](https://hal.science/hal-05573274)
+[![Platform](https://img.shields.io/badge/platform-x86--64%20%7C%20ARM%20Cortex--A55-lightgrey.svg)]()
+
+## What is SLK?
+
+SLK is an axiomatic constraint validator implemented in **397 lines of ISO C99** with **zero dynamic memory allocation**. It validates proposed knowledge insertions against 16 universal axioms before accepting them into a knowledge base K.
+
+SLK is **not** an inference engine — it does not perform chaining, unification, or resolution. It is a validation kernel: deterministic, formally specified, and portable to any C99 platform without OS dependency.
+
+## Key Numbers (all measured)
+
+| Metric | x86-64 Linux | ARM Cortex-A55 Android |
+|--------|-------------|------------------------|
+| Binary size | **2,360 bytes** | **2,314 bytes** |
+| Latency per call | **0.034 µs** | **0.065 µs** |
+| Throughput | **29.27 M val/s** | **15.40 M val/s** |
+| Dynamic allocation | **0 bytes** | **0 bytes** |
+| Unit tests | **39 / 39** | **39 / 39** |
+
+**ProofWriter validation (train split, 85,468 instances, maxD=0 to maxD=9):**
+- 956,782 validation calls
+- 0 implementation errors
+- Theorem 1 holds at all depth levels
+
+## Why SLK?
+
+| System | Scope | Proof type | x86+ARM | Zero malloc | <20KB |
+|--------|-------|-----------|---------|-------------|-------|
+| microKanren | Relational logic | Yes (Coq, mechanized) | No | No | Yes |
+| seL4 | OS kernel | Yes (Isabelle, mechanized) | No | No | No |
+| emlearn | Statistical ML | None | ARM only | Yes | Yes |
+| TFLite Micro | NN inference | None | ARM only | Partial | Partial |
+| LINC + Prover9 | LLM reasoning | Yes (paper) | No | No | No |
+| **SLK (this work)** | **Constraint validation** | **Yes (paper proof)** | **Yes — C99** | **Yes** | **Yes (2.3KB)** |
+
+Note: microKanren and seL4 have mechanized proofs — a stronger guarantee than SLK's current paper proof. Coq mechanization of Theorem 1 is planned future work.
+
+## The 16 Axioms
+
+| Family | Axioms | Guarantee |
+|--------|--------|-----------|
+| F1 — Structural | A1.1 Uniqueness, A1.2 Arity, A1.3 Finiteness, A1.4 Stability, A1.5 Alphabet | No duplicate ids, valid arities |
+| F2 — Temporal | A2.1 Arrow, A2.2 Causality, A2.3 Confluence | Monotone clock, deterministic transitions |
+| F3 — Topology | A3.1 Reference coherence, A3.2 Id immutability | No dangling references |
+| F4 — Security | A4.1 Kernel immutability, A4.2 Priority, A4.3 Atomicity, A4.4 Boot integrity | Axioms in .rodata, unconditional blocking |
+| F5 — Conservation | A5.1 Monotonicity, A5.2 R/W separation | No spontaneous deletion |
+
+## Theorem 1 (Validation Correctness)
+
+> The C99 implementation of `slk_validate()` faithfully implements the validation function V: for all inputs (S, K), `slk_validate(S, K)` returns 1 if and only if V(S, K, A) = 1.
+
+**Proof strategy:** structural argument (code inspection) + 39 unit tests + 956,782 ProofWriter validation calls with zero errors. Mechanized proof in Coq is planned future work.
+
+## Quick Start
 
 ```bash
 git clone https://github.com/Emile55/slk-kernel
 cd slk-kernel
 
-gcc -DSLK_ENABLE_STRINGS -I./include -I./src \
-    -o test_kernel \
-    tests/test_kernel.c src/kernel.c \
-    -std=c99 -Wall -O2
+# Linux / macOS
+gcc -DSLK_ENABLE_STRINGS -I./include -I./src -O2 \
+    tests/test_kernel.c src/kernel.c -o test_kernel
+./test_kernel
 
+# Windows (MinGW)
+gcc -DSLK_ENABLE_STRINGS -I./include -I./src -O2 \
+    tests/test_kernel.c src/kernel.c -o test_kernel.exe
+./test_kernel.exe
+
+# ARM Android (Termux)
+clang -DSLK_ENABLE_STRINGS -I./include -I./src -O2 \
+    tests/test_kernel.c src/kernel.c -o test_kernel
 ./test_kernel
 ```
 
-Expected result: **39/39 tests PASS**
+Expected output: `39 Tests passed, 0 Tests failed`
 
-## Or with Make
-
-```bash
-make
-```
-
-## Measured results (x86-64 Linux)
-
-| Metric | Value |
-|---|---|
-| Unit tests | 39/39 PASS |
-| Kernel size (text segment) | ~2360 bytes |
-| slk_validate() latency | 0.034 µs |
-| Throughput | 29M validations/s |
-| Dynamic allocation | 0 malloc |
-
-## Compilation on Windows (MinGW)
-
-```cmd
-gcc -DSLK_ENABLE_STRINGS -I./include -I./src ^
-    -o test_kernel.exe ^
-    tests/test_kernel.c src/kernel.c ^
-    -std=c99 -Wall -O2
-
-test_kernel.exe
-```
-
-## Cross-compilation for ARM Cortex-M4
+## ProofWriter Benchmark
 
 ```bash
-arm-none-eabi-gcc -DSLK_ENABLE_STRINGS -I./include \
-    -mcpu=cortex-m4 -mthumb -Os -std=c99 \
-    -c src/kernel.c -o kernel_arm.o
-
-arm-none-eabi-size kernel_arm.o
+cd benchmarks
+pip install datasets
+python proofwriter_bench.py
 ```
 
-Expected ARM size: **< 4 KB** (text segment)
+Runs on the complete ProofWriter train split (85,468 instances).
 
-## Architecture
+## Repository Structure
 
 ```
 slk-kernel/
-├── include/
-│   └── slk_types.h      (SLK_Simplex, SLK_Kernel, SLK_Relation definitions)
 ├── src/
-│   ├── slk_axioms.h     (16 universal axioms as static inline functions)
-│   └── kernel.c         (slk_init, slk_validate, slk_find, slk_count)
-└── tests/
-    └── test_kernel.c    (39 unit tests)
+│   ├── kernel.c          # 397 lines — main validation logic
+│   └── slk_axioms.h      # 16 axiom functions (static inline C)
+├── include/
+│   └── slk_types.h       # Type definitions
+├── tests/
+│   └── test_kernel.c     # 39 unit tests
+├── benchmarks/
+│   ├── proofwriter_bench.py   # ProofWriter benchmark
+│   └── slk_bridge.py          # Python ctypes bridge
+├── paper.md              # JOSS paper
+├── paper.bib             # References
+└── Makefile
 ```
 
-## The 16 axioms
-
-| Family | Axioms | Property |
-|---|---|---|
-| F1 — Structural coherence | A1.1 – A1.5 | Uniqueness, arity, finiteness, stability, alphabet |
-| F2 — Temporal causality | A2.1 – A2.3 | Temporal arrow, strict causality, confluence |
-| F3 — Graph topology | A3.1 – A3.2 | Reference coherence, identifier immutability |
-| F4 — Security and integrity | A4.1 – A4.4 | Kernel immutability, absolute priority, atomicity, boot integrity |
-| F5 — Information conservation | A5.1 – A5.2 | Weak monotonicity, read/write separation |
-
-**Theorem 1 (Soundness):** No simplex incoherent with knowledge base K and axiom set A can be accepted by the kernel, at arbitrary constraint complexity.
-
-## Why SLK
-
-| System | Formal soundness | x86-64 + ARM bare-metal | Zero malloc | <20KB binary | Docker-free safety |
-|---|---|---|---|---|---|
-| SWI-Prolog | Yes | No (>50MB) | No | No | No |
-| emlearn | No | ARM only | Yes | Yes | No |
-| OpenClaw | No | No (Node.js) | No | No | No |
-| **SLK (this work)** | **Yes (Theorem 1)** | **Yes — C99 universal** | **Yes** | **Yes (4–16KB)** | **Yes (axiomatic)** |
 
 ## License
 
-![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg) 
-Commercial licensing: contact [egonkol@gmail.com]  
-Copyright (c) 2026  Emile Gonkol — Brazzaville, Republic of Congo
+- **Kernel source code:** [AGPL-3.0](LICENSE)
+- **Paper (paper.md, paper.bib):** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+
+## Author
+
+**Emile Fanel Gonkol**
+Independent Researcher — Brazzaville, Republic of Congo
+egonkol@gmail.com
+ORCID: [0009-0004-3911-0300](https://orcid.org/0009-0004-3911-0300)
