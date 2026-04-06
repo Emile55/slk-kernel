@@ -115,6 +115,10 @@ slk-kernel/
 - **Kernel source code:** [AGPL-3.0](LICENSE)
 - **Paper (paper.md, paper.bib):** [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
 
+## Paper
+Preprint, 2026. DOI: 10.5281/zenodo.19425043
+
+
 ## Author
 
 **Emile Fanel Gonkol**
